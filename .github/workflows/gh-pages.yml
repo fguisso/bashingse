@@ -1,0 +1,63 @@
+name: Deploy scripts to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build site
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p site
+
+          mapfile -t files < <(
+            find . -type f -name "*.sh" \
+              -not -path "./.git/*" \
+              -not -path "./.github/*" \
+              -not -path "./site/*"
+          )
+
+          if [[ "${#files[@]}" -eq 0 ]]; then
+            echo "No .sh files found."
+            exit 1
+          fi
+
+          for f in "${files[@]}"; do
+            base="$(basename "$f")"
+            if [[ -e "site/$base" ]]; then
+              echo "Duplicate script name: $base"
+              exit 1
+            fi
+            cp "$f" "site/$base"
+          done
+
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
