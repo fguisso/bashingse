@@ -26,7 +26,30 @@ install_core_packages() {
   apt-get update -qq
   apt-get install -y --no-install-recommends \
     git \
-    mosh
+    mosh \
+    zsh \
+    locales
+}
+
+fix_locale() {
+  log "Configuring locale..."
+  sed -i 's/^# *en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
+  locale-gen en_US.UTF-8
+  update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+  export LANG=en_US.UTF-8
+  export LC_ALL=en_US.UTF-8
+}
+
+set_default_shell_zsh() {
+  local zsh_path
+  zsh_path="$(command -v zsh)"
+  if [[ -z "$zsh_path" ]]; then
+    warn "zsh not found, skipping shell change."
+    return
+  fi
+  grep -qF "$zsh_path" /etc/shells || echo "$zsh_path" >> /etc/shells
+  log "Setting default shell to zsh for $(whoami)..."
+  chsh -s "$zsh_path"
 }
 
 install_chezmoi() {
@@ -56,6 +79,7 @@ apply_chezmoi() {
 # Main
 # =========================
 install_core_packages
+fix_locale
 
 if ! has_chezmoi; then
   install_chezmoi
@@ -63,5 +87,6 @@ fi
 
 check_ssh_agent
 apply_chezmoi
+set_default_shell_zsh
 
 log "Done."
