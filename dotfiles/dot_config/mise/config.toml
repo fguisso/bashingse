@@ -1,0 +1,5 @@
+[tools]
+gcloud = "latest"
+go = "latest"
+node = "lts"
+rust = "latest"

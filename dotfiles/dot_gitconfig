@@ -1,0 +1,14 @@
+[user]
+	name = fguisso
+	email = fguisso@gmail.com
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
+[commit]
+	gpgsign = true
+[gpg]
+	format = ssh
+[gpg "ssh"]
+	allowedSignersFile = ~/.ssh/allowed_signers
+	defaultKeyCommand = sh -c 'ssh-add -L | sed -n \"1s/^/key::/p\"'

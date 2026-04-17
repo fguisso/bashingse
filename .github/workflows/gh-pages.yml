@@ -29,14 +29,11 @@ jobs:
           mkdir -p site
 
           mapfile -t files < <(
-            find . -type f \( -name "*.sh" -o -name "*.ps1" \) \
-              -not -path "./.git/*" \
-              -not -path "./.github/*" \
-              -not -path "./site/*"
+            find bootstrap tools -type f \( -name "*.sh" -o -name "*.ps1" \) 2>/dev/null
           )
 
           if [[ "${#files[@]}" -eq 0 ]]; then
-            echo "No .sh files found."
+            echo "No scripts found in bootstrap/ or tools/."
             exit 1
           fi
 

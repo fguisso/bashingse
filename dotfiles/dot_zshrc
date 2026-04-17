@@ -1,0 +1,14 @@
+# Powerlevel10k instant prompt — must stay near the top.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+
+_os=$(uname -s | tr '[:upper:]' '[:lower:]')
+[[ -f ~/.config/shell/${_os}.zsh ]] && source ~/.config/shell/${_os}.zsh
+source ~/.config/shell/common.zsh
+unset _os
+
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
