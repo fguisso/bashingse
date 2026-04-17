@@ -1,0 +1,47 @@
+# Shell
+brew "antidote"
+brew "powerlevel10k"
+
+# Dotfiles & runtime
+brew "chezmoi"
+brew "mise"
+
+# Dev tools
+brew "git"
+brew "gh"
+brew "neovim"
+brew "ripgrep"
+brew "uv"
+brew "hugo"
+brew "gnupg"
+brew "infisical"
+brew "semgrep"
+
+# Containers
+brew "colima"
+brew "docker"
+brew "docker-buildx"
+brew "docker-compose"
+
+# Media
+brew "ffmpeg"
+
+# GUI apps
+cask "1password"
+cask "1password-cli"
+cask "rio"
+cask "firefox"
+cask "google-chrome"
+cask "visual-studio-code"
+cask "discord"
+cask "slack"
+cask "telegram"
+cask "whatsapp"
+cask "zoom"
+cask "logseq"
+cask "wifiman"
+cask "syncthing-app"
+cask "codex-app"
+
+# Fonts
+cask "font-0xproto-nerd-font"

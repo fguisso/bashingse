@@ -1,10 +1,11 @@
 # bashingse
 
-Init scripts published via GitHub Pages at `b.guisso.dev`.
+Monorepo com scripts de bootstrap, utilitários de terminal e dotfiles (chezmoi).
 
-Every `.sh` file in this repo is automatically deployed on push to `main`.
+- `bootstrap/` e `tools/` são publicados em GitHub Pages em `b.guisso.dev`.
+- `dotfiles/` é a fonte do [chezmoi](https://www.chezmoi.io/) (apontado por `.chezmoiroot`).
 
-## Scripts
+## Bootstrap
 
 ### macOS
 
@@ -12,11 +13,14 @@ Every `.sh` file in this repo is automatically deployed on push to `main`.
 curl -fsSL https://b.guisso.dev/init-mac.sh | bash
 ```
 
-Bootstraps a fresh Mac:
-1. Installs Xcode Command Line Tools
-2. Installs Homebrew, `git`, `chezmoi`, `1password-cli`, and the 1Password app
-3. Pauses for manual 1Password setup (SSH Agent + CLI integration)
-4. Applies dotfiles via `chezmoi init --apply`
+Script single-stage que:
+1. Instala Xcode Command Line Tools (re-run uma vez se precisar).
+2. Instala Homebrew.
+3. Instala `git` + `chezmoi`.
+4. Instala Claude Code (native installer da Anthropic).
+5. Aplica o chezmoi deste repo (via HTTPS — sem depender de 1Password SSH).
+6. Roda `brew bundle` com o Brewfile completo.
+7. Imprime passos opcionais de pós-install (1Password SSH agent, login do Claude Code, Apple ID).
 
 ### Debian LXC
 
@@ -24,45 +28,73 @@ Bootstraps a fresh Mac:
 curl -fsSL https://b.guisso.dev/init-debian-lxc.sh | bash
 ```
 
-Bootstraps a Debian LXC container accessed via SSH:
-1. Installs `git` and `mosh` via apt
-2. Installs `chezmoi` via the official installer
-3. Verifies SSH agent forwarding is active (`ssh -A`)
-4. Applies dotfiles via `chezmoi init --apply`
+1. Instala `git`, `mosh`, `zsh`, `locales` via apt.
+2. Ajusta locale pra `en_US.UTF-8`.
+3. Instala `chezmoi` via installer oficial.
+4. Aplica o chezmoi deste repo via HTTPS.
+5. Define `zsh` como shell padrão.
 
-> Requires connecting with agent forwarding: `ssh -A user@host`
+## Tools
 
 ### Matrix screensaver
 
-**macOS / Linux:**
 ```sh
 curl -fsSL https://b.guisso.dev/matrix.sh | bash
 ```
 
-With options (spacing=50, auto-exit after 30s):
+Com opções (densidade=50, timeout=30s):
 ```sh
 curl -fsSL https://b.guisso.dev/matrix.sh | bash -s -- 50 30
 ```
 
-**Windows (PowerShell 7+):**
+Windows (PowerShell 7+):
 ```powershell
 irm https://b.guisso.dev/matrix.ps1 | iex
 ```
 
-With options via env vars:
-```powershell
-$env:MATRIX_SPACING=50; $env:MATRIX_TIMEOUT=30; irm https://b.guisso.dev/matrix.ps1 | iex
+Variáveis: `MATRIX_DENSITY`, `MATRIX_TIMEOUT`. Qualquer tecla ou `Ctrl+C` sai.
+
+## Dotfiles (chezmoi)
+
+Gerenciados em `dotfiles/`. Estrutura:
+
+```
+dotfiles/
+├── Brewfile                           — brew bundle completo
+├── dot_gitconfig                      — git config
+├── dot_p10k.zsh                       — powerlevel10k theme
+├── dot_zshrc                          — loader (sem template)
+├── dot_config/
+│   ├── mise/config.toml               — runtimes via mise
+│   ├── rio/config.toml                — terminal
+│   └── shell/
+│       ├── common.zsh                 — cross-OS (EDITOR, PATH, mise)
+│       ├── darwin.zsh                 — macOS (brew, antidote, 1Password SSH)
+│       ├── linux.zsh                  — Linux (antidote, p10k paths)
+│       └── plugins.txt                — antidote plugin list
+├── private_dot_ssh/allowed_signers    — SSH allowed signers pra gpg ssh
+├── run_after_macos_defaults.sh        — reaplica defaults do macOS a cada apply
+├── run_once_install-linux-shell-deps.sh.tmpl — antidote + p10k + mise no Linux
+└── .chezmoiexternal.toml              — puxa fguisso/lazyvim-config em ~/.config/nvim
 ```
 
-- Press any key or `Ctrl+C` to exit — terminal content is fully restored
-- `MATRIX_SPACING` — density (1–200, lower = denser, default 80)
-- `MATRIX_TIMEOUT` — auto-exit after N seconds (0 = forever)
+### Aplicar manualmente
 
-## How it works
+```sh
+chezmoi init --apply https://github.com/fguisso/bashingse.git
+```
+
+### Atualizar
+
+```sh
+chezmoi update
+```
+
+## Deploy
 
 ```
 push to main
     └── GitHub Actions
-            └── copies all *.sh → site/
-                    └── deploys to GitHub Pages (b.guisso.dev)
+            └── copia bootstrap/*.sh + tools/*.{sh,ps1} para site/ (flattened)
+                    └── deploy em GitHub Pages (b.guisso.dev)
 ```
