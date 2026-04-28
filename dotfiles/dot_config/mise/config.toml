@@ -1,4 +1,5 @@
 [tools]
+bun = "latest"
 gcloud = "latest"
 go = "latest"
 node = "lts"

@@ -13,14 +13,39 @@ Monorepo com scripts de bootstrap, utilitários de terminal e dotfiles (chezmoi)
 curl -fsSL https://b.guisso.dev/init-mac.sh | bash
 ```
 
+Pré-requisitos: Mac com macOS recente, conexão com a internet, senha de admin (Homebrew pede `sudo`). O script reata `stdin` ao TTY, então o GUI do Xcode CLT e o prompt de senha funcionam mesmo via `curl | bash`.
+
 Script single-stage que:
-1. Instala Xcode Command Line Tools (re-run uma vez se precisar).
-2. Instala Homebrew.
+1. Instala Xcode Command Line Tools (espera o instalador GUI; falha após 30 min).
+2. Instala Homebrew e adiciona `brew shellenv` ao `~/.zprofile`.
 3. Instala `git` + `chezmoi`.
-4. Instala Claude Code (native installer da Anthropic).
-5. Aplica o chezmoi deste repo (via HTTPS — sem depender de 1Password SSH).
-6. Roda `brew bundle` com o Brewfile completo.
+4. Instala Claude Code (native installer da Anthropic) em `~/.local/bin/claude`.
+5. Aplica o chezmoi deste repo via HTTPS (sem depender de 1Password SSH).
+6. Roda `brew bundle` com o `dotfiles/Brewfile`.
 7. Imprime passos opcionais de pós-install (1Password SSH agent, login do Claude Code, Apple ID).
+
+Re-rodar é seguro: cada passo é idempotente (checa se já tem antes de instalar).
+
+#### O que fica disponível depois
+
+- **CLI**: `git`, `gh`, `chezmoi`, `mise`, `neovim`, `ripgrep`, `uv`, `hugo`, `gnupg`, `infisical`, `semgrep`, `ffmpeg`, `colima`, `docker` (+ `buildx`/`compose`), `claude`.
+- **Runtimes via mise** (`~/.config/mise/config.toml`): `bun`, `node` (lts), `go`, `rust`, `gcloud` — instalam no primeiro shell ou via `mise install`.
+- **GUI apps** (casks): 1Password (+ CLI), Rio, Firefox, Chrome, VS Code, Discord, Slack, Telegram, WhatsApp, Zoom, Logseq, WiFiman, Syncthing, Codex.
+- **Shell**: zsh com antidote + powerlevel10k, configs em `~/.config/shell/{common,darwin}.zsh`.
+- **Editor**: Neovim com [fguisso/lazyvim-config](https://github.com/fguisso/lazyvim-config) clonado em `~/.config/nvim` (via `.chezmoiexternal.toml`).
+- **Defaults do macOS** reaplicados a cada `chezmoi apply` (`run_after_macos_defaults.sh`).
+
+#### Gerenciando novas adições
+
+Tudo vive no monorepo — edite a fonte e re-aplique.
+
+- **Novo app/CLI via brew** → editar `dotfiles/Brewfile` (`brew "..."` ou `cask "..."`) → `brew bundle --file ~/.local/share/chezmoi/dotfiles/Brewfile` (ou rodar o init de novo).
+- **Novo runtime via mise** → editar `dotfiles/dot_config/mise/config.toml` → `chezmoi apply` → `mise install`.
+- **Mudança em dotfile já gerenciado** → editar direto em `dotfiles/` e `chezmoi apply`, ou editar o arquivo real e `chezmoi re-add <path>`.
+- **Novo dotfile** → `chezmoi add ~/.config/foo` traz pra dentro do source state; commitar em `dotfiles/`.
+- **Plugin de shell** → `dotfiles/dot_config/shell/plugins.txt` (antidote).
+- **Sync com upstream** numa máquina já provisionada → `chezmoi update` (faz `git pull` no source + `apply`).
+- **Ver o que vai mudar antes de aplicar** → `chezmoi diff`.
 
 ### Debian LXC
 
