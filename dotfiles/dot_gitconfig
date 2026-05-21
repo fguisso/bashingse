@@ -1,6 +1,7 @@
 [user]
 	name = fguisso
 	email = fguisso@gmail.com
+	signingkey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKv+e8yarkzF4zavFxv9v/DZnEcCDgJHLcqPGrtl88yr
 [init]
 	defaultBranch = main
 [pull]

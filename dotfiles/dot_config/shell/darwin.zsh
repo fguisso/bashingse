@@ -4,6 +4,9 @@ if [ -x /opt/homebrew/bin/brew ]; then
 fi
 
 # Antidote
+# Why: zsh-autosuggestions re-binds ZLE widgets on every prompt (~5ms) because
+# fast-syntax-highlighting wraps them. MANUAL_REBIND disables that loop.
+ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
 antidote load ~/.config/shell/plugins.txt
 

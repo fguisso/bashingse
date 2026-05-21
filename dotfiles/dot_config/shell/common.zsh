@@ -1,5 +1,3 @@
 export EDITOR=nvim
 
-export PATH="$PATH:$HOME/.local/bin:$HOME/codeql"
-
-eval "$(mise activate zsh)"
+export PATH="$HOME/.local/share/mise/shims:$PATH:$HOME/.local/bin:$HOME/codeql"
