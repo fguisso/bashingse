@@ -14,8 +14,10 @@ antidote load ~/.config/shell/plugins.txt
 source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 
 # 1Password SSH Agent
-# Why: só assume o agente local se nada já forneceu um. Sem o guard, entrar
-# nesta máquina por ssh -A sobrescreveria a chave encaminhada.
+# Why: SSH_CONNECTION vazio significa sessão local, então o agente do 1Password
+# manda. Numa sessão remota o sshd já entregou um agente encaminhado e
+# sobrescrever mataria a chave. Testar -z SSH_AUTH_SOCK não serve: no macOS o
+# launchd sempre pré-popula a variável com o agente do sistema.
 _op_sock="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-[[ -z $SSH_AUTH_SOCK && -S $_op_sock ]] && export SSH_AUTH_SOCK="$_op_sock"
+[[ -z $SSH_CONNECTION && -S $_op_sock ]] && export SSH_AUTH_SOCK="$_op_sock"
 unset _op_sock
