@@ -14,4 +14,8 @@ antidote load ~/.config/shell/plugins.txt
 source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 
 # 1Password SSH Agent
-export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+# Why: só assume o agente local se nada já forneceu um. Sem o guard, entrar
+# nesta máquina por ssh -A sobrescreveria a chave encaminhada.
+_op_sock="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+[[ -z $SSH_AUTH_SOCK && -S $_op_sock ]] && export SSH_AUTH_SOCK="$_op_sock"
+unset _op_sock

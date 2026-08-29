@@ -86,7 +86,8 @@ apply_chezmoi() {
 }
 
 brew_bundle() {
-  local brewfile="${HOME}/.local/share/chezmoi/dotfiles/Brewfile"
+  # source-path já resolve o .chezmoiroot, então aponta pra <clone>/dotfiles.
+  local brewfile="$("$CHEZMOI_BIN" source-path)/Brewfile"
   if [[ ! -f "$brewfile" ]]; then
     warn "Brewfile not found at $brewfile — skipping bundle."
     return

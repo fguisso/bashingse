@@ -12,4 +12,7 @@
 	format = ssh
 [gpg "ssh"]
 	allowedSignersFile = ~/.ssh/allowed_signers
-	defaultKeyCommand = sh -c 'ssh-add -L | sed -n \"1s/^/key::/p\"'
+# Clonar por HTTPS segue funcionando (o bootstrap depende disso, antes do
+# 1Password existir), mas todo push sai por SSH via agente do 1Password.
+[url "git@github.com:"]
+	pushInsteadOf = https://github.com/
