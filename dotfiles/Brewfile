@@ -1,3 +1,6 @@
+# Taps
+tap "netbirdio/tap"
+
 # Shell
 brew "antidote"
 brew "powerlevel10k"
@@ -42,6 +45,8 @@ cask "whatsapp"
 cask "signal"
 cask "wifiman"
 cask "chatgpt"
+# Also pulls the netbird formula (CLI + daemon)
+cask "netbirdio/tap/netbird-ui"
 
 # Fonts
 cask "font-0xproto-nerd-font"
