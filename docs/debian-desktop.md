@@ -59,7 +59,7 @@ bash /tmp/init-debian-desktop.sh --skip-apps
 
 `--with-chatgpt` acrescenta o aplicativo oficial em preview. Baixa o `.deb` correspondente, confere nome/arquitetura, salva os scripts de manutencao e simula a instalacao antes de chamar APT com `--no-remove`. O pacote configura seu repositorio de atualizacoes. A documentacao lista Debian 13; Forky ainda precisa de validacao. Na revisao de 2026-11-15, o link oficial foi confirmado, mas o download direto desta assistencia retornou HTTP 403. Se isso ocorrer no Debian, usar navegador/Codex e investigar o download; nao instalar wrappers de terceiros como substituicao automatica.
 
-`--skip-apps` aplica somente a base e o perfil chezmoi, sem 1Password, Codex ou ChatGPT. Aplicativos que ja existem sao preservados; reexecutar nao e um atualizador geral deles.
+`--skip-apps` aplica somente a base e o perfil chezmoi, sem 1Password, Codex ou ChatGPT. Aplicativos que ja existem sao preservados; reexecutar nao e um atualizador geral deles. Para 1Password tar em /opt/1Password, a reexecucao tambem confere a entrada do menu, sem reinstalar o aplicativo.
 
 Para testar uma branch publicada antes de ela chegar a main, usar `BASHINGSE_REF=nome-da-branch bash arquivo-do-bootstrap.sh`. Isso tambem seleciona a branch dos dotfiles; baixar o proprio bootstrap dessa mesma revisao.
 
@@ -71,11 +71,22 @@ Uma configuracao chezmoi preexistente nao gerenciada por este bootstrap interrom
 
 O instalador tar 1Password revisado (8.12.44) cria integracoes em `/usr/share/applications`, icones, politica polkit, configuracao em `/etc/1password`, grupos auxiliares, links em `/usr/bin` e permissoes setuid/setgid nos helpers do fornecedor. Nao habilita login, agente SSH ou MCP na conta automaticamente. A variante tar nao configura repositorio APT; atualizacoes precisam seguir o metodo oficial tar. O arquivo e a assinatura precisam coincidir; uma publicacao concorrente pode exigir repetir o download.
 
+Apos instalar 1Password tar, e tambem ao encontra-lo ja instalado no mesmo caminho, o bootstrap garante modo 0644 nas entradas de menu do fornecedor em /usr/share/applications. Preserva o conteudo de entradas existentes, cria as ausentes a partir dos templates e recusa destinos que sejam links simbolicos. O cache KDE e reconstruido como usuario normal quando kbuildsycoca6 esta disponivel. Instalacoes em outros caminhos nao recebem esse ajuste. Isso evita uma entrada 0600 root:root invisivel ao usuario, observada no Air com 1Password 8.12.44; a origem inicial do modo incorreto nao foi comprovada. Nao altera permissoes dos helpers, binarios ou cofres.
+
+Para corrigir apenas uma instalacao afetada, sem repetir todo o bootstrap, conferir a entrada existente e executar no Konsole:
+
+```sh
+sudo chmod 0644 /usr/share/applications/com.onepassword.OnePassword.desktop
+kbuildsycoca6
+```
+
+O segundo comando se aplica ao KDE Plasma 6. A permissao anterior pode ser restaurada com chmod usando o modo registrado antes do ajuste, seguido da reconstrucao do cache. Se a entrada foi criada pelo bootstrap e precisar ser removida, conferir primeiro se nao foi modificada ou adotada por outra instalacao. Esse reparo de menu e a unica excecao a preservacao integral dos arquivos de aplicativos existentes.
+
 Se uma instalacao parcial deixar `/opt/1Password` sem o comando correspondente, o bootstrap para para revisao e nao apaga o diretorio. Para desfazer configuracoes de usuario, restaurar os arquivos da pasta `backup/` registrada no final, revisando diferencas feitas depois. Interromper o gerenciamento chezmoi desses alvos antes de restaurar para nao reaplica-los sem querer. Nao apagar chaves/cofres.
 
 A remocao de aplicativos e uma operacao separada: ChatGPT instalado por APT e removido como pacote e sua fonte deve ser revisada; Codex nativo guarda binarios em `~/.local/bin` e pacotes em `~/.codex/packages`, separados do login/configuracao; 1Password tar exige revisar os caminhos criados pelo pos-instalador. Preservar dados da conta e backups ao planejar remocao. Este script nao executa desinstalacao automatica.
 
-Nao muda locale, shell padrao, KDE, kernel, particoes ou politica de boot. APT pode atualizar dependencias dos pacotes solicitados; `--no-remove` impede resolver conflitos apagando pacotes. Se o sistema exigir troca de componentes, diagnosticar antes de prosseguir.
+Nao muda locale, shell padrao, preferencias KDE, kernel, particoes ou politica de boot. APT pode atualizar dependencias dos pacotes solicitados; `--no-remove` impede resolver conflitos apagando pacotes. Se o sistema exigir troca de componentes, diagnosticar antes de prosseguir.
 
 ## Fontes e verificacao
 
@@ -84,5 +95,7 @@ Nao muda locale, shell padrao, KDE, kernel, particoes ou politica de boot. APT p
 - [Codex oficial](https://github.com/openai/codex): instalador `https://chatgpt.com/codex/install.sh`, com Linux ARM64.
 - [ChatGPT Linux](https://learn.chatgpt.com/docs/linux/linux-app?translationFallback=es-419): preview ARM64, suporte listado para Debian 13 e limites Wayland/Computer Use.
 - [Chezmoi](https://www.chezmoi.io/user-guide/manage-machine-to-machine-differences/): configuracao por maquina e templates.
+
+Teste do reparo de menu: `python3 tests/1password-menu.py`, sem sudo real, instaladores ou alteracao do desktop. Cobre entrada ausente, modo 0600, reaplicacao, preservacao de conteudo, recusa de link simbolico e instalacao fora do caminho gerenciado.
 
 Testes do repo: `python3 tests/debian-desktop.py`, com chezmoi no PATH, e `bash -n bootstrap/init-debian-desktop.sh`. O teste usa HOME/destino temporarios, verifica reaplicacao e preservacao do Bash, assinatura Git, isolamento dos perfis e bloqueio fora do Linux. Nao testa instalacao real dos aplicativos ou autenticacao no Air; esses resultados devem ser registrados no maclaren apos executar no Debian.

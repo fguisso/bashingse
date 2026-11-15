@@ -82,8 +82,31 @@ if ! has chezmoi; then
   sh "$state/chezmoi-install.sh" -b "$HOME/.local/bin"
 fi
 
+fix_1password_menu() {
+  # Somente a instalacao tar no caminho usado por este bootstrap.
+  [[ "$(readlink -f "$(command -v 1password)")" == /opt/1Password/1password ]] || return 0
+  local name template desktop
+  for name in com.onepassword.OnePassword.desktop 1password.desktop; do
+    template="/opt/1Password/resources/$name"
+    [[ -f "$template" ]] || continue
+    desktop="/usr/share/applications/$name"
+    [[ ! -L "$desktop" ]] || die "Entrada de menu e um link simbolico; revisar: $desktop"
+    if [[ -f "$desktop" ]]; then
+      # Preserva o conteudo existente, inclusive personalizacoes locais.
+      sudo chmod 0644 "$desktop"
+    else
+      sudo install -m 0644 "$template" "$desktop"
+    fi
+  done
+  if has kbuildsycoca6; then kbuildsycoca6; fi
+}
+
 install_1password() {
-  if has 1password; then log '1Password ja disponivel; instalacao existente preservada'; return; fi
+  if has 1password; then
+    log '1Password ja disponivel; preservando aplicativo e conferindo entrada do menu'
+    fix_1password_menu
+    return
+  fi
   [[ ! -e /opt/1Password ]] || die '/opt/1Password ja existe sem comando 1password; revisar a instalacao parcial.'
   log "Instalando 1Password nativo para $arch, com assinatura verificada"
   sudo apt-get install -y --no-install-recommends --no-remove libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 libcurl4t64 libdrm2 libgbm1 libgtk-3-0t64 libnotify4 libnss3 libxcb-shape0 libxcb-xfixes0 libxshmfence1 libudev1 xdg-utils
@@ -120,6 +143,7 @@ PY
   sudo cp -R "$extracted/." /opt/1Password/
   sudo chown -R root:root /opt/1Password
   sudo /opt/1Password/after-install.sh
+  fix_1password_menu
 }
 
 install_codex() {
