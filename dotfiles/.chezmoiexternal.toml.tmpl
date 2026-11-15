@@ -1,3 +1,4 @@
+{{ if ne (default "completo" (get . "profile")) "debian-desktop-minimo" -}}
 [".config/nvim"]
   type = "git-repo"
   url = "https://github.com/fguisso/lazyvim-config.git"
@@ -6,3 +7,4 @@
     args = ["--depth", "1"]
   [".config/nvim".pull]
     args = ["--ff-only"]
+{{ end -}}

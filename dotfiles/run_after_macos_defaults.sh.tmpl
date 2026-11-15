@@ -1,3 +1,4 @@
+{{ if ne (default "completo" (get . "profile")) "debian-desktop-minimo" -}}
 #!/usr/bin/env bash
 # Reaplica defaults do macOS que costumam resetar após atualizações.
 # Roda automaticamente a cada `chezmoi apply`.
@@ -48,3 +49,4 @@ defaults write com.apple.screencapture location -string "${HOME}/Screenshots"
 
 # ─── Reinicia processos afetados ────────────────────────────────────────────
 killall Finder Dock SystemUIServer >/dev/null 2>&1 || true
+{{ end -}}

@@ -1,3 +1,4 @@
+{{ if ne (default "completo" (get . "profile")) "debian-desktop-minimo" -}}
 #!/usr/bin/env bash
 # Preferências do Canario. Ele não lê o config.toml do Rio: guarda tudo em
 # UserDefaults (com.raphaelamorim.canario). Roda quando este arquivo muda.
@@ -11,3 +12,4 @@ defaults write "$d" fontFamily  -string "0xProto Nerd Font Mono"
 defaults write "$d" fontSize    -int    14
 defaults write "$d" cursorBlink -bool   true
 defaults write "$d" chromeColor -string "#E2B8AB"
+{{ end -}}

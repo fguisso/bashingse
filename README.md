@@ -29,15 +29,15 @@ Re-rodar é seguro: cada passo é idempotente (checa se já tem antes de instala
 #### O que fica disponível depois
 
 - **CLI**: `git`, `gh`, `chezmoi`, `mise`, `neovim`, `ripgrep`, `uv`, `hugo`, `gnupg`, `infisical`, `semgrep`, `pulumi`, `ffmpeg`, `colima`, `docker` (+ `buildx`/`compose`), `claude`.
-- **Runtimes via mise** (`~/.config/mise/config.toml`): `bun`, `node` (lts), `go`, `rust`, `gcloud` — resolvidos por shims em `~/.local/share/mise/shims`.
+- **Runtimes via mise** (`~/.config/mise/config.toml`): `bun`, `node` (lts), `go`, `rust`, `gcloud` - resolvidos por shims em `~/.local/share/mise/shims`.
 - **GUI apps** (casks): 1Password (+ CLI), Rio, Canário, Firefox, Chrome, VS Code, Discord, Slack, Telegram, WhatsApp, Signal, WiFiman, ChatGPT.
 - **Shell**: zsh com antidote + powerlevel10k, configs em `~/.config/shell/{common,darwin}.zsh`.
 - **Editor**: Neovim com [fguisso/lazyvim-config](https://github.com/fguisso/lazyvim-config) clonado em `~/.config/nvim` (via `.chezmoiexternal.toml`).
-- **Defaults do macOS** reaplicados a cada `chezmoi apply` (`run_after_macos_defaults.sh`).
+- **Defaults do macOS** reaplicados a cada `chezmoi apply` (`run_after_macos_defaults.sh.tmpl`).
 
 #### Gerenciando novas adições
 
-Tudo vive no monorepo — edite a fonte e re-aplique.
+Tudo vive no monorepo - edite a fonte e re-aplique.
 
 - **Novo app/CLI via brew** → editar `dotfiles/Brewfile` (`brew "..."` ou `cask "..."`) → `brew bundle --file "$(chezmoi source-path)/Brewfile"` (ou rodar o init de novo).
 - **Novo runtime via mise** → editar `dotfiles/dot_config/mise/config.toml` → `chezmoi apply` → `mise install`.
@@ -46,6 +46,21 @@ Tudo vive no monorepo — edite a fonte e re-aplique.
 - **Plugin de shell** → `dotfiles/dot_config/shell/plugins.txt` (antidote).
 - **Sync com upstream** numa máquina já provisionada → `chezmoi update` (faz `git pull` no source + `apply`).
 - **Ver o que vai mudar antes de aplicar** → `chezmoi diff`.
+
+### Debian desktop minimo
+
+Para Debian 13/Trixie ou Forky em arm64/amd64, no terminal do usuario normal:
+
+```sh
+curl -fL https://b.guisso.dev/init-debian-desktop.sh -o /tmp/init-debian-desktop.sh
+bash /tmp/init-debian-desktop.sh
+```
+
+Instala a base de terminal, chezmoi, 1Password nativo com assinatura verificada e Codex CLI. Aplica o perfil `debian-desktop-minimo`: Git/assinatura e integracao do agente 1Password com Bash, preservando o conteudo existente. Mantem o shell atual e deixa zsh, mise/runtimes, LazyVim e defaults do macOS fora dessa aplicacao.
+
+Depois, entrar no 1Password, habilitar Settings > Developer > SSH Agent, abrir outro terminal e executar `~/.local/bin/codex`, escolhendo **Sign in with ChatGPT**.
+
+O aplicativo ChatGPT Desktop oficial e opcional com `--with-chatgpt`; `--skip-apps` instala somente base e perfil chezmoi. Conferir [ambiente, efeitos, recuperacao e limitacoes](docs/debian-desktop.md) antes de executar. O script pede sudo apenas nos passos de sistema; nao iniciar com `sudo bash`. Nao altera kernel, particoes, KDE ou shell padrao.
 
 ### Debian LXC
 
@@ -85,27 +100,27 @@ Gerenciados em `dotfiles/`. Estrutura:
 
 ```
 dotfiles/
-├── Brewfile                           — brew bundle completo
-├── dot_gitconfig                      — git config
-├── dot_p10k.zsh                       — powerlevel10k theme
-├── dot_zshrc                          — loader (sem template)
+├── Brewfile                           - brew bundle completo
+├── dot_gitconfig                      - git config
+├── dot_p10k.zsh                       - powerlevel10k theme
+├── dot_zshrc                          - loader (sem template)
 ├── dot_config/
-│   ├── mise/config.toml               — runtimes via mise
-│   ├── rio/config.toml                — terminal
+│   ├── mise/config.toml               - runtimes via mise
+│   ├── rio/config.toml                - terminal
 │   └── shell/
-│       ├── common.zsh                 — cross-OS (EDITOR, PATH, mise)
-│       ├── darwin.zsh                 — macOS (brew, antidote, 1Password SSH)
-│       ├── linux.zsh                  — Linux (antidote, p10k paths)
-│       └── plugins.txt                — antidote plugin list
-├── private_dot_ssh/allowed_signers    — SSH allowed signers pra gpg ssh
-├── run_after_macos_defaults.sh        — reaplica defaults do macOS a cada apply
-├── run_once_install-linux-shell-deps.sh — antidote + p10k + mise no Linux
-└── .chezmoiexternal.toml              — puxa fguisso/lazyvim-config em ~/.config/nvim
+│       ├── common.zsh                 - cross-OS (EDITOR, PATH, mise)
+│       ├── darwin.zsh                 - macOS (brew, antidote, 1Password SSH)
+│       ├── linux.zsh                  - Linux (antidote, p10k paths)
+│       └── plugins.txt                - antidote plugin list
+├── private_dot_ssh/allowed_signers    - SSH allowed signers pra gpg ssh
+├── run_after_macos_defaults.sh.tmpl        - reaplica defaults do macOS a cada apply
+├── run_once_install-linux-shell-deps.sh.tmpl - antidote + p10k + mise no Linux
+└── .chezmoiexternal.toml              - puxa fguisso/lazyvim-config em ~/.config/nvim
 ```
 
 ### Como funciona
 
-**chezmoi copia arquivos — não faz symlink.** Não existe symlink nenhum apontando pro
+**chezmoi copia arquivos - não faz symlink.** Não existe symlink nenhum apontando pro
 repo: `chezmoi apply` materializa cópias no `$HOME`. Consequência prática: editar
 `~/.zshrc` direto vira *drift*, e o próximo `apply` sobrescreve. O caminho certo é
 editar `dotfiles/` e aplicar, ou editar o arquivo real e `chezmoi re-add <path>`.
@@ -153,28 +168,28 @@ sourceDir = "/Users/<voce>/bashingse"
 
 ### Avisos
 
-- **`run_after_macos_defaults.sh` roda a cada `chezmoi apply`** e faz
-  `defaults delete com.apple.dock persistent-apps` — ou seja, **zera os apps fixados
+- **`run_after_macos_defaults.sh.tmpl` roda a cada `chezmoi apply`** e faz
+  `defaults delete com.apple.dock persistent-apps` - ou seja, **zera os apps fixados
   no Dock** toda vez. Também reinicia Finder, Dock e SystemUIServer.
 - **`commit.gpgsign = true` é incondicional.** Até o 1Password estar aberto e com o
   SSH agent ligado, **todo `git commit` falha**. No Debian LXC não há 1Password:
   a assinatura depende de entrar com agent forwarding (`ssh -A` / mosh), e por isso
   os arquivos de shell só definem `SSH_AUTH_SOCK` quando ele ainda está vazio.
 - **Push é sempre SSH.** O `pushInsteadOf` no gitconfig reescreve remotes HTTPS do
-  GitHub para `git@github.com:` no push. Clone por HTTPS continua valendo — o
+  GitHub para `git@github.com:` no push. Clone por HTTPS continua valendo - o
   bootstrap depende disso, já que roda antes do 1Password existir.
 - **mise usa shims, não `mise activate`.** Os shims resolvem binários, mas **não**
   injetam variáveis: a seção `[env]` de um `mise.toml` por diretório deixa de
   funcionar. Depois de instalar runtime novo, rode `mise reshim`.
 - **Apple Silicon apenas.** `/opt/homebrew` está hardcoded em `darwin.zsh`,
   `dot_p10k.zsh` e `init-mac.sh`. Num Mac Intel (`/usr/local`) o shell quebra calado.
-- **`init-debian-lxc.sh` exige root** — roda `apt-get` e `chsh` sem `sudo`. Debian é
+- **`init-debian-lxc.sh` exige root** - roda `apt-get` e `chsh` sem `sudo`. Debian é
   o único alvo testado.
 - **`~/.zprofile` não é gerenciado pelo chezmoi**: o `init-mac.sh` faz append
   idempotente do `brew shellenv` nele. É o único arquivo do `$HOME` escrito fora do
   chezmoi.
 - **`$HOME/codeql` entra no PATH** via `common.zsh`, mas nada neste repo instala o
-  CodeQL — é um diretório que você popula à mão quando precisa.
+  CodeQL - é um diretório que você popula à mão quando precisa.
 
 ## Deploy
 
