@@ -1,1 +1,15 @@
 Brewfile
+{{ if eq (default "completo" (get . "profile")) "debian-desktop-minimo" }}
+.zshrc
+.p10k.zsh
+.config/mise
+.config/rio
+.config/nvim
+.config/shell/common.zsh
+.config/shell/darwin.zsh
+.config/shell/linux.zsh
+.config/shell/plugins.txt
+{{ else }}
+.bashrc
+.config/shell/1password-agent.sh
+{{ end }}

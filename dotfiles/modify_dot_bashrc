@@ -1,0 +1,6 @@
+#!/bin/sh
+# Preserva o conteudo existente e acrescenta uma unica linha gerenciada.
+awk '
+{ print; if ($0 == "[ ! -r \"$HOME/.config/shell/1password-agent.sh\" ] || . \"$HOME/.config/shell/1password-agent.sh\"") found = 1 }
+END { if (!found) print "[ ! -r \"$HOME/.config/shell/1password-agent.sh\" ] || . \"$HOME/.config/shell/1password-agent.sh\"" }
+'
